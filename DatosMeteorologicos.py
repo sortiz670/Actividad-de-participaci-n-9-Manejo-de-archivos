@@ -1,5 +1,3 @@
-import math
-
 class DatosMeteorologicos:
     def __init__(self, nombre_archivo):
         self.nombre_archivo = nombre_archivo
@@ -11,13 +9,13 @@ class DatosMeteorologicos:
         }
 
     def procesar_datos(self):
-        temperaturas, humedades, presiones, velocidades_viento, grados_viento = [], [], [], [], []
+        temperaturas, humedades, presiones, velocidades_viento, direcciones_contadas = [], [], [], [], {}
         registro_actual = {}
         with open(self.nombre_archivo, 'r') as archivo:
             for linea in archivo:
                 if linea.strip() == '':
                     if registro_actual:
-                        
+                        # Procesa el registro actual
                         if 'Temperatura' in registro_actual:
                             temperaturas.append(float(registro_actual['Temperatura']))
                         if 'Humedad' in registro_actual:
@@ -27,28 +25,27 @@ class DatosMeteorologicos:
                         if 'Viento' in registro_actual:
                             velocidad, direccion = registro_actual['Viento'].split(',')
                             velocidades_viento.append(float(velocidad))
-                            grados_viento.append(self.direcciones_viento[direccion.strip()])
+                            if direccion.strip() in direcciones_contadas:
+                                direcciones_contadas[direccion.strip()] += 1
+                            else:
+                                direcciones_contadas[direccion.strip()] = 1
                         registro_actual = {}
                 else:
-                    clave, valor = linea.split(':', 1)  
+                    clave, valor = linea.split(':', 1)
                     registro_actual[clave.strip()] = valor.strip()
 
-        
+        # Calcular promedios
         temperatura_promedio = sum(temperaturas) / len(temperaturas)
         humedad_promedio = sum(humedades) / len(humedades)
         presion_promedio = sum(presiones) / len(presiones)
         velocidad_promedio_viento = sum(velocidades_viento) / len(velocidades_viento)
 
-        
-        suma_seno = sum(math.sin(math.radians(grado)) for grado in grados_viento)
-        suma_coseno = sum(math.cos(math.radians(grado)) for grado in grados_viento)
-        promedio_angulo = math.atan2(suma_seno, suma_coseno)
-        promedio_grados = math.degrees(promedio_angulo) % 360
-        direccion_predominante = min(self.direcciones_viento, key=lambda k: abs(self.direcciones_viento[k] - promedio_grados))
+        # Determinar la dirección predominante del viento
+        direccion_predominante = max(direcciones_contadas, key=direcciones_contadas.get)
 
         return (temperatura_promedio, humedad_promedio, presion_promedio, velocidad_promedio_viento, direccion_predominante)
 
-
+# Uso de la clase
 datos = DatosMeteorologicos('datos_meteorologicos.txt')
 resultados = datos.procesar_datos()
 print(f"Temperatura promedio: {resultados[0]}°C")
