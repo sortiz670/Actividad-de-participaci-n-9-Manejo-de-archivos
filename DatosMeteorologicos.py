@@ -15,7 +15,7 @@ class DatosMeteorologicos:
             for linea in archivo:
                 if linea.strip() == '':
                     if registro_actual:
-                        # Procesa el registro actual
+                        
                         if 'Temperatura' in registro_actual:
                             temperaturas.append(float(registro_actual['Temperatura']))
                         if 'Humedad' in registro_actual:
@@ -34,18 +34,18 @@ class DatosMeteorologicos:
                     clave, valor = linea.split(':', 1)
                     registro_actual[clave.strip()] = valor.strip()
 
-        # Calcular promedios
+        
         temperatura_promedio = sum(temperaturas) / len(temperaturas)
         humedad_promedio = sum(humedades) / len(humedades)
         presion_promedio = sum(presiones) / len(presiones)
         velocidad_promedio_viento = sum(velocidades_viento) / len(velocidades_viento)
 
-        # Determinar la dirección predominante del viento
+        
         direccion_predominante = max(direcciones_contadas, key=direcciones_contadas.get)
 
         return (temperatura_promedio, humedad_promedio, presion_promedio, velocidad_promedio_viento, direccion_predominante)
 
-# Uso de la clase
+
 datos = DatosMeteorologicos('datos_meteorologicos.txt')
 resultados = datos.procesar_datos()
 print(f"Temperatura promedio: {resultados[0]}°C")
